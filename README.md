@@ -7,7 +7,7 @@ Cheep ODM
 
 Cheep ODM is a simple reflection-based object document mapping for MongoDB in the spirit of cheep-orm (https://github.com/davidcarboni/cheep-orm). It does not attempt to solve any clever problems, but does give you Create, Read, Update, Delete and Find.
 
-The mapping strategy is to go via JSON, using Google's GSON (https://sites.google.com/site/gson/gson-user-guide), so it's pretty straightforward to map your POJOs with minimum weight of annotation/configuration. The only extra thing you need to do is add an @Table annotation (javax.persistence) to your class to define the Mongo collection. You don't even need to provide a 'name' attribute: it defaults to the name of your class.
+The mapping strategy is to go via JSON, using Google's GSON (https://sites.google.com/site/gson/gson-user-guide), so it's pretty straightforward to map your POJOs with minimum weight of annotation/configuration. The one thing you do need to do is add an @Table annotation (javax.persistence) to your class to define the Mongo collection. You don't even need to provide a 'name' - this will default to the name of your class.
 
 
 ### Licensing:
