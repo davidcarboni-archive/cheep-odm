@@ -237,6 +237,13 @@ public class Odm {
 		if (mongo == null) {
 			mongo = new MongoClient(uri);
 		}
+
+		// Helpful error, rather than just a null pointer:
+		if (StringUtils.isBlank(uri.getDatabase())) {
+			throw new IllegalArgumentException(
+					"No database is specified in the MongoDB URI: " + mongoUri);
+		}
+
 		return mongo.getDB(uri.getDatabase());
 	}
 
