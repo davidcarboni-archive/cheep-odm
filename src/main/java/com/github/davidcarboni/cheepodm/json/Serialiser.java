@@ -32,6 +32,19 @@ public class Serialiser {
 	}
 
 	/**
+	 * Constructs an instance with a custom type adapter for Bson ID, plus one
+	 * additional supplied type adapter. This is convenient if you have just one
+	 * custom adapter and don't want to create a map each time to call
+	 * {@link #Serialiser(Map)}.
+	 * 
+	 * @param typeAdapters
+	 *            Custom type adapters for Gson serialisation.
+	 */
+	public Serialiser(Class<?> type, Object typeAdapter) {
+		this.typeAdapters.put(type, typeAdapter);
+	}
+
+	/**
 	 * Serialises the given object to Json.
 	 * 
 	 * @param object
