@@ -55,18 +55,18 @@ public class Odm {
 	 *            The Mongo {@link DB}.
 	 * @param collection
 	 *            The Mongo collection.
-	 * @param row
+	 * @param document
 	 *            The record to be created. On return, the ID will be set in
 	 *            this object.
 	 */
-	public void create(Document row) {
-		checkRow(row);
+	public void create(Document document) {
+		checkDocument(document);
 
-		String collection = getCollection(row);
-		String serialised = serialiser.serialise(row);
+		String collection = getCollection(document);
+		String serialised = serialiser.serialise(document);
 		DBObject dbObject = (DBObject) JSON.parse(serialised);
 		database.getCollection(collection).insert(dbObject);
-		row.setId((ObjectId) dbObject.get("_id"));
+		document.setId((ObjectId) dbObject.get("_id"));
 	}
 
 	/**
@@ -76,25 +76,25 @@ public class Odm {
 	 *            The Mongo {@link DB}.
 	 * @param collection
 	 *            The Mongo collection.
-	 * @param row
-	 *            The record to be located. Only {@link Document#getId()} is used to
-	 *            locate the record .
-	 * @return The read record. If the record does not exist, or if the row
-	 *         parameter is null, null is returned.
+	 * @param document
+	 *            The record to be located. Only {@link Document#getId()} is
+	 *            used to locate the record .
+	 * @return The read {@link Document}. If the record does not exist, or if
+	 *         the document parameter is null, null is returned.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Document> T read(T row) {
-		checkId(row);
+	public <T extends Document> T read(T document) {
+		checkId(document);
 
 		// Read the object:
-		String collection = getCollection(row);
+		String collection = getCollection(document);
 		BasicDBObject search = new BasicDBObject();
-		search.put("_id", row.getId());
+		search.put("_id", document.getId());
 		DBObject dbObject = database.getCollection(collection).findOne(search);
 
 		// Convert to the return type:
 		String json = JSON.serialize(dbObject);
-		return (T) serialiser.deserialise(json, row.getClass());
+		return (T) serialiser.deserialise(json, document.getClass());
 	}
 
 	/**
@@ -104,23 +104,24 @@ public class Odm {
 	 *            The Mongo {@link DB}.
 	 * @param collection
 	 *            The Mongo collection.
-	 * @param row
-	 *            The record to be updated. {@link Document#getId()} is used to
-	 *            locate the record and update it using the given row.
+	 * @param document
+	 *            The {@link Document} to be updated. {@link Document#getId()}
+	 *            is used to locate the record and update it using the given
+	 *            document.
 	 * @return The previous value of the record. If no matching record could be
 	 *         found, null is returned.
 	 */
-	public <T extends Document> DBObject update(T row) {
-		checkId(row);
+	public <T extends Document> DBObject update(T document) {
+		checkId(document);
 
 		// Serialise the update:
-		String serialised = serialiser.serialise(row);
+		String serialised = serialiser.serialise(document);
 		DBObject dbObject = (DBObject) JSON.parse(serialised);
 
 		// Update the object:
-		String collection = getCollection(row);
+		String collection = getCollection(document);
 		BasicDBObject search = new BasicDBObject();
-		search.put("_id", row.getId());
+		search.put("_id", document.getId());
 		return database.getCollection(collection).findAndModify(search,
 				dbObject);
 	}
@@ -132,19 +133,19 @@ public class Odm {
 	 *            The Mongo {@link DB}.
 	 * @param collection
 	 *            The Mongo collection.
-	 * @param row
-	 *            The record to be deleted. Only {@link Document#getId()} is used to
-	 *            locate the record.
+	 * @param document
+	 *            The {@link Document} to be deleted. Only
+	 *            {@link Document#getId()} is used to locate the record.
 	 * @return The previous value of the record. If no matching record could be
 	 *         found, null is returned.
 	 */
-	public <T extends Document> boolean delete(T row) {
-		checkId(row);
+	public <T extends Document> boolean delete(T document) {
+		checkId(document);
 
 		// Delete the object:
-		String collection = getCollection(row);
+		String collection = getCollection(document);
 		BasicDBObject search = new BasicDBObject();
-		search.put("_id", row.getId());
+		search.put("_id", document.getId());
 		return database.getCollection(collection).findAndRemove(search) != null;
 	}
 
@@ -155,13 +156,34 @@ public class Odm {
 	 *            The Mongo {@link DB}.
 	 * @param collection
 	 *            The Mongo collection.
-	 * @param row
+	 * @param document
+	 *            The search criteria.
+	 * @return A {@link List} of matching records.
+	 */
+	public <T extends Document> List<T> list(Class<T> type) {
+
+		// Convert to the return type:
+		List<T> result = new ArrayList<>();
+		String collection = getCollection(type);
+		DBCursor cursor = database.getCollection(collection).find();
+		while (cursor.hasNext()) {
+			String json = JSON.serialize(cursor.next());
+			result.add(serialiser.deserialise(json, type));
+		}
+
+		return result;
+	}
+
+	/**
+	 * Lists records matching the given criteria.
+	 * 
+	 * @param criteria
 	 *            The search criteria.
 	 * @return A {@link List} of matching records.
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Document> List<T> search(T criteria) {
-		checkRow(criteria);
+		checkDocument(criteria);
 
 		// Set up the search object:
 		String serialised = serialiser.serialise(criteria);
@@ -180,36 +202,46 @@ public class Odm {
 	}
 
 	/**
-	 * Gets the collection for the given row type.
+	 * Gets the collection for the type of the given {@link Document} instance.
 	 * 
-	 * @param row
+	 * @param document
 	 *            The instance to determine the collection for.
 	 * @return The collection name.
 	 */
-	private String getCollection(Document row) {
+	private String getCollection(Document document) {
+		return getCollection(document.getClass());
+	}
+
+	/**
+	 * Gets the collection for the given type.
+	 * 
+	 * @param type
+	 *            The type to determine the collection for.
+	 * @return The collection name.
+	 */
+	private String getCollection(Class<? extends Document> type) {
 		String result = null;
-		Table table = row.getClass().getAnnotation(Table.class);
+		Table table = type.getAnnotation(Table.class);
 		if (table == null) {
-			throw new IllegalArgumentException(row.getClass().getSimpleName()
+			throw new IllegalArgumentException(type.getSimpleName()
 					+ " is not annotated as a " + Table.class.getSimpleName()
 					+ ". Are you sure this is right?");
 		}
-		result = StringUtils.defaultIfBlank(table.name(), row.getClass()
-				.getSimpleName());
+		result = StringUtils.defaultIfBlank(table.name(), type.getSimpleName());
 		return result;
 	}
 
 	/**
 	 * Throws an {@link IllegalArgumentException} if the parameter is null.
 	 * 
-	 * @param row
+	 * @param document
 	 *            The instance to check.
 	 */
-	private void checkRow(Document row) {
+	private void checkDocument(Document document) {
 
-		// Check we have a row:
-		if (row == null) {
-			throw new IllegalArgumentException("No row provided.");
+		// Check we have a document:
+		if (document == null) {
+			throw new IllegalArgumentException("No document provided.");
 		}
 	}
 
@@ -217,17 +249,18 @@ public class Odm {
 	 * Throws an {@link IllegalArgumentException} if the field of the parameter
 	 * is null.
 	 * 
-	 * @param row
+	 * @param document
 	 *            The instance to check.
 	 */
-	private void checkId(Document row) {
+	private void checkId(Document document) {
 
-		// Check we have a row:
-		checkRow(row);
+		// Check we have a document:
+		checkDocument(document);
 
 		// Check we have an ID:
-		if (row.getId() == null) {
-			throw new IllegalArgumentException("The row ID has not been set.");
+		if (document.getId() == null) {
+			throw new IllegalArgumentException(
+					"The document ID has not been set.");
 		}
 	}
 
