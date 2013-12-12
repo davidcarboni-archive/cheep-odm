@@ -15,7 +15,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-class DateTimeSerialiser implements JsonSerializer<DateTime>,
+public class DateTimeSerialiser implements JsonSerializer<DateTime>,
 		JsonDeserializer<DateTime> {
 
 	public static final String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";

@@ -14,7 +14,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-class ObjectIdSerialiser implements JsonSerializer<ObjectId>,
+public class ObjectIdSerialiser implements JsonSerializer<ObjectId>,
 		JsonDeserializer<ObjectId> {
 
 	@Override

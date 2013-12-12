@@ -22,9 +22,30 @@ public class Odm {
 
 	private static MongoClient mongo;
 	private DB database;
+	private Serialiser serialiser;
 
+	/**
+	 * Constructs an instance with a default {@link Serialiser}.
+	 * 
+	 * @param database
+	 *            The database to work with.
+	 */
 	public Odm(DB database) {
 		this.database = database;
+		serialiser = new Serialiser();
+	}
+
+	/**
+	 * Constructs an instance with the given {@link Serialiser}.
+	 * 
+	 * @param database
+	 *            The database to work with.
+	 * @param serialiser
+	 *            A customised selialiser (e.g. with additional type adapters).
+	 */
+	public Odm(DB database, Serialiser serialiser) {
+		this.database = database;
+		this.serialiser = serialiser;
 	}
 
 	/**
@@ -42,7 +63,7 @@ public class Odm {
 		checkRow(row);
 
 		String collection = getCollection(row);
-		String serialised = Serialiser.serialise(row);
+		String serialised = serialiser.serialise(row);
 		DBObject dbObject = (DBObject) JSON.parse(serialised);
 		database.getCollection(collection).insert(dbObject);
 		row.setId((ObjectId) dbObject.get("_id"));
@@ -73,7 +94,7 @@ public class Odm {
 
 		// Convert to the return type:
 		String json = JSON.serialize(dbObject);
-		return (T) Serialiser.deserialise(json, row.getClass());
+		return (T) serialiser.deserialise(json, row.getClass());
 	}
 
 	/**
@@ -93,7 +114,7 @@ public class Odm {
 		checkId(row);
 
 		// Serialise the update:
-		String serialised = Serialiser.serialise(row);
+		String serialised = serialiser.serialise(row);
 		DBObject dbObject = (DBObject) JSON.parse(serialised);
 
 		// Update the object:
@@ -143,7 +164,7 @@ public class Odm {
 		checkRow(criteria);
 
 		// Set up the search object:
-		String serialised = Serialiser.serialise(criteria);
+		String serialised = serialiser.serialise(criteria);
 		DBObject search = (DBObject) JSON.parse(serialised);
 
 		// Convert to the return type:
@@ -152,7 +173,7 @@ public class Odm {
 		DBCursor cursor = database.getCollection(collection).find(search);
 		while (cursor.hasNext()) {
 			String json = JSON.serialize(cursor.next());
-			result.add((T) Serialiser.deserialise(json, criteria.getClass()));
+			result.add((T) serialiser.deserialise(json, criteria.getClass()));
 		}
 
 		return result;
