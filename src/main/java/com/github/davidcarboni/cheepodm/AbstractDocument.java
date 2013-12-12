@@ -4,7 +4,7 @@ import org.bson.types.ObjectId;
 
 import com.google.gson.annotations.SerializedName;
 
-public class SimpleRow {
+public abstract class AbstractDocument {
 
 	@SerializedName("_id")
 	private ObjectId id;

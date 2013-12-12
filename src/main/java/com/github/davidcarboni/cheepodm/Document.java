@@ -2,7 +2,7 @@ package com.github.davidcarboni.cheepodm;
 
 import org.bson.types.ObjectId;
 
-public interface Row {
+public interface Document {
 
 	/**
 	 * @return the id

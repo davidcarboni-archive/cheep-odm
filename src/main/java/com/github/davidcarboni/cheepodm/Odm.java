@@ -59,7 +59,7 @@ public class Odm {
 	 *            The record to be created. On return, the ID will be set in
 	 *            this object.
 	 */
-	public void create(Row row) {
+	public void create(Document row) {
 		checkRow(row);
 
 		String collection = getCollection(row);
@@ -77,13 +77,13 @@ public class Odm {
 	 * @param collection
 	 *            The Mongo collection.
 	 * @param row
-	 *            The record to be located. Only {@link Row#getId()} is used to
+	 *            The record to be located. Only {@link Document#getId()} is used to
 	 *            locate the record .
 	 * @return The read record. If the record does not exist, or if the row
 	 *         parameter is null, null is returned.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Row> T read(T row) {
+	public <T extends Document> T read(T row) {
 		checkId(row);
 
 		// Read the object:
@@ -105,12 +105,12 @@ public class Odm {
 	 * @param collection
 	 *            The Mongo collection.
 	 * @param row
-	 *            The record to be updated. {@link Row#getId()} is used to
+	 *            The record to be updated. {@link Document#getId()} is used to
 	 *            locate the record and update it using the given row.
 	 * @return The previous value of the record. If no matching record could be
 	 *         found, null is returned.
 	 */
-	public <T extends Row> DBObject update(T row) {
+	public <T extends Document> DBObject update(T row) {
 		checkId(row);
 
 		// Serialise the update:
@@ -133,12 +133,12 @@ public class Odm {
 	 * @param collection
 	 *            The Mongo collection.
 	 * @param row
-	 *            The record to be deleted. Only {@link Row#getId()} is used to
+	 *            The record to be deleted. Only {@link Document#getId()} is used to
 	 *            locate the record.
 	 * @return The previous value of the record. If no matching record could be
 	 *         found, null is returned.
 	 */
-	public <T extends Row> boolean delete(T row) {
+	public <T extends Document> boolean delete(T row) {
 		checkId(row);
 
 		// Delete the object:
@@ -160,7 +160,7 @@ public class Odm {
 	 * @return A {@link List} of matching records.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Row> List<T> search(T criteria) {
+	public <T extends Document> List<T> search(T criteria) {
 		checkRow(criteria);
 
 		// Set up the search object:
@@ -186,7 +186,7 @@ public class Odm {
 	 *            The instance to determine the collection for.
 	 * @return The collection name.
 	 */
-	private String getCollection(Row row) {
+	private String getCollection(Document row) {
 		String result = null;
 		Table table = row.getClass().getAnnotation(Table.class);
 		if (table == null) {
@@ -205,7 +205,7 @@ public class Odm {
 	 * @param row
 	 *            The instance to check.
 	 */
-	private void checkRow(Row row) {
+	private void checkRow(Document row) {
 
 		// Check we have a row:
 		if (row == null) {
@@ -220,7 +220,7 @@ public class Odm {
 	 * @param row
 	 *            The instance to check.
 	 */
-	private void checkId(Row row) {
+	private void checkId(Document row) {
 
 		// Check we have a row:
 		checkRow(row);
