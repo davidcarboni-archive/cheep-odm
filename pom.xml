@@ -3,7 +3,7 @@
 	<groupId>com.github.davidcarboni</groupId>
 	<artifactId>cheep-odm</artifactId>
 	<name>Cheep ODM</name>
-	<version>0.0.1</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<description>Object-document mapping with Gson.</description>
 	<url>https://github.com/davidcarboni/cheep-odm</url>
@@ -21,7 +21,7 @@
 		<url>https://github.com/davidcarboni/cheep-odm</url>
 		<connection>scm:git:git://github.com/davidcarboni/cheep-odm.git</connection>
 		<developerConnection>scm:git:git@github.com:davidcarboni/cheep-odm.git</developerConnection>
-		<tag>cheep-odm-0.0.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<properties>
